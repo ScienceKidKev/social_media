@@ -34,7 +34,41 @@ def post_feed():
 
     )
 
+
+@app.route("/sign-in")
+def sign_in():
+
+    return render_template(
+        "sign_in.html.jinja"
     
+    )
+
+
+@app.route("/sign-up", methods=['POST', 'GET'])
+def sign_up():
+    if request.method=='POST':
+         #Hanlde signup
+        cursor=connection.cursor()
+        cursor.execute("""
+             INSERT INTO `Users` ('username', 'password', 'email', 'display_name', 'bio', 'photo' )
+             VALUES (%s, %s, %s, %s, %s, %s)
+        """[])
+
+        return request.form
+    elif request.method=='GET':
+         return render_template('sign_up.html.jinja')
+
+
+    return render_template(
+        "sign_up.html.jinja"
+    
+    )
+
+
+
+
+
+
 
 
 connection = pymysql.connect(
