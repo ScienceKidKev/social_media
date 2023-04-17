@@ -21,6 +21,10 @@ class User:
      def get_id(self):
         return str(self.id)
      
+@app.get('/media/')
+def send_media(path):
+    return send_from_directory('media', path)
+     
     
 @login_manager.user_loader
 def user_loader(user_id):
@@ -121,5 +125,15 @@ connection = pymysql.connect(
 
 )
 
+@app.route('/profile/<username>')
+def user_profile(username):
+     cursor= connection.cursor()
+
+     cursor.execute(' SELECT * FROM `Users` WHERE `username`= %s', (username))
+
+     result= cursor.fetchone()
+     
+     return render_template('user_profile.html.jinja', user=result)
+
 if __name__=='__main__':
-        app.run(debug=True)
+        app.run(debug=True, port=5001)
