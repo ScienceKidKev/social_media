@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request,redirect
+from flask import Flask, render_template, request,redirect, send_from_directory, abort
 import pymysql
 import pymysql.cursors
 from flask_login import LoginManager
@@ -8,6 +8,7 @@ login_manager=LoginManager()
 
 app = Flask(__name__)
 login_manager.init_app(app)
+
 
 class User:
      def __init__(self, id, username, banned):
@@ -127,13 +128,31 @@ connection = pymysql.connect(
 
 @app.route('/profile/<username>')
 def user_profile(username):
-     cursor= connection.cursor()
+    cursor= connection.cursor()
 
-     cursor.execute(' SELECT * FROM `Users` WHERE `username`= %s', (username))
+    cursor.execute(' SELECT * FROM `Users` WHERE `username`= %s', (username))
 
-     result= cursor.fetchone()
+    result= cursor.fetchone()
      
-     return render_template('user_profile.html.jinja', user=result)
+    if result is None:
+          abort(404)
+        
+    cursor.close()
+
+    cursor=connection.cursor()
+
+    cursor.execute('SELECT *from `Posts` WHERE `user_id` =%s',(result['id']))
+
+    post_result= cursor.fetchall()
+
+    
+    
+
+    return render_template('user_profile.html.jinja',  user=result, posts=post_result)
+
+@app.errorhandler(404)
+def four_o_four(e):
+     return render_template('404.html.jinja')
 
 if __name__=='__main__':
         app.run(debug=True, port=5001)
