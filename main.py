@@ -22,7 +22,7 @@ class User:
      def get_id(self):
         return str(self.id)
      
-@app.get('/media/')
+@app.get('/media/<path:path>')
 def send_media(path):
     return send_from_directory('media', path)
      

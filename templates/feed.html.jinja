@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+{# <!DOCTYPE html>
 <html lang="en">
     <head>
         <meta charset="utf-8">
@@ -18,7 +18,79 @@
                 
             </div>
         {% endfor %} 
-    </body>
+    </body> #}
 
+
+
+
+<!DOCTYPE html>
+<html lang="en"></html>
+<head>
+<meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="Mark Otto, Jacob Thornton, and Bootstrap contributors">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous">
+        <link href = "/static/styles.css" type= "text/css" rel="stylesheet">
+            <link rel="canonical" href="https://getbootstrap.com/docs/5.3/examples/headers/">
+
+  
+</head>
+
+<body>
+   <div>
+    
+      <nav class="nav nav-masthead justify-content-center float-md-end">
+        <a class="nav-link fw-bold py-1 px-0 active" aria-current="page" href="#">Home</a>
+        <a class="nav-link fw-bold py-1 px-0 active" href="/sign-out">Sign in</a>
+        <a class="nav-link fw-bold py-1 px-0 active " href="/sign-up">Sign Up</a>
+      </nav>
+    </div>
+
+<h1 class= "text-center">Wassup!! {{current_user.username}}</h1> <hr>
+<br>
+
+
+<div class="mx-auto p-2 border-dark rounded" style="width: 700px;">
+
+<h2>Whats on your mind?</h2>
+ <form action="/post" method="post" enctype="multipart/form-data">
+<div class="mb-3">
+ <input type="text" name="post" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" placeholder="Say something interesting...funny...sad...">
+<br>
+    <label for="exampleInputPassword1" class="form-label">Profile image</label>
+    <input type="file" name="image" class="form-control" id="exampleInputPassword1">
+    <br>
+     <button type="submit" class="w-100 btn btn-lg btn-primary" style="width: 150px;">Post</button>
+</div>
+
+
+</form>
+
+</div>
+   
+        {% for post in posts%}
+
+        <div  class="border border-dark p-2 mt-5 rounded mx-auto p-2" style="width: 400px;">
+
+
+                <h1>{{post['timestamp'].strftime('%b, %-d, %Y, %I:%M')}}</h1>
+                <h2>{{post['display_name']}}({{post['username']}})</h2>
+                <img src="{{post['post_image']}}" width="900">
+                <p>{{post['post_text']}}</p>
+         
+            <p>{{post['caption']}}</p>
+            <img src= "/media/post/{{post['post_image']}}"  hight = "400" width= "400" class="object-fit-cover rounded"> 
+            
+        </div>
+
+        {% endfor%}
+    </ul>
+</h2>
+
+</body>
+
+</div>
+</html>
 
 </html>
