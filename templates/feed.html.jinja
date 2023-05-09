@@ -42,7 +42,7 @@
     
       <nav class="nav nav-masthead justify-content-center float-md-end" style="padding: 8px;" style="display: inline-block;">
         <a class="nav-link fw-bold py-1 px-0 active" aria-current="page" href="home">Home</a>
-        <a class="nav-link fw-bold py-1 px-0 active" aria-current="page" href="post">Posts</a>
+        <a class="nav-link fw-bold py-1 px-0 active" aria-current="page" href="feed">Feed</a>
         <a class="nav-link fw-bold py-1 px-0 active" href="/sign-in">Sign in</a>
         <a class="nav-link fw-bold py-1 px-0 active " href="/sign-up">Sign Up</a>
       </nav>
@@ -76,9 +76,9 @@
 
 
                 <h1>{{post['timestamp'].strftime('%b, %-d, %Y, %I:%M')}}</h1>
-                <h2>{{post['display_name']}}({{post['username']}})</h2>
+                <h2>{{post['display_name'] | escape }}({{post['username'] | escape }})</h2>
                 <img src="{{post['post_image']}}" width="900">
-                <p>{{post['post_text']}}</p>
+                <p>{{post['post_text'] | escape }}</p>
          
             <p>{{post['caption']}}</p>
             <img src= "/media/post/{{post['post_image']}}"   class="object-fit-cover rounded"> 

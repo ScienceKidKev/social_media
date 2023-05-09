@@ -81,7 +81,7 @@
         <div  class="border border-dark p-2 mt-5 rounded mx-auto p-2" style="width: 800px;">
 
 
-            <p>{{post['username']}} ({{post['display_name']}})</p>
+            <p>{{post['username'] | escape}} ({{post['display_name'] | escape}})</p>
             <p>{{post['timestamp'].strftime("%b %-m, %Y ")}}</p>
          
             <p>{{post['caption']}}</p>

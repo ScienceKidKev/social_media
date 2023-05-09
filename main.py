@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request,redirect, send_from_directory, abort
 import pymysql
 import pymysql.cursors
-from flask_login import LoginManager
+from flask_login import LoginManager, login_required, current_user
 
 login_manager=LoginManager()
 
@@ -50,7 +50,7 @@ def index():
 
     )
 
-@app.route('/post')
+@app.route('/feed')
 def post_feed():
       
       cursor = connection.cursor()
@@ -66,6 +66,32 @@ def post_feed():
         
 
     )
+
+@app.route('/post', methods=['POST'])
+@login_required
+def create_post():
+    cursor = connection.cursor()
+
+    photo = request.files['post_image']
+
+    file_name = photo.filename # my_photo.jpg
+
+    file_extension = file_name.split('.')[-1]
+
+    if file_extension.lower() in ['jpg', 'jpeg', 'png', 'gif']:
+        photo.save('media/posts/' + file_name)
+    else:
+        raise Exception('Invalid file type')
+
+    user_id = current_user.id
+
+    cursor.execute(
+        "INSERT INTO `posts` (`post_text`, `post_image`, `user_id`) VALUES (%s, %s, %s)", 
+        (request.form['post_text'], file_name, user_id)
+    )
+
+    return redirect('/feed')
+
 
 
 @app.route("/sign-in")
