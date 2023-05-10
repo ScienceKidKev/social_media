@@ -1,13 +1,15 @@
-from flask import Flask, render_template, request,redirect, send_from_directory, abort
+from flask import Flask, render_template, request,redirect, send_from_directory, abort, g
 import pymysql
 import pymysql.cursors
-from flask_login import LoginManager, login_required, current_user
+from flask_login import LoginManager, login_required, current_user, login_user
 
 login_manager=LoginManager()
 
 
 app = Flask(__name__)
 login_manager.init_app(app)
+
+app.config['SECRET_KEY'] = 'g67e46htsjdfgikuytraDSASE323'
 
 
 class User:
@@ -29,9 +31,9 @@ def send_media(path):
     
 @login_manager.user_loader
 def user_loader(user_id):
-     cursor=connection.cursor()
+     cursor=get_db().cursor()
 
-     cursor.execute("SELECT * from `users` WHERE `id` ="+ user_id)
+     cursor.execute("SELECT * from `Users` WHERE `id` ="+ user_id)
 
      result=cursor.fetchone()
 
@@ -53,7 +55,7 @@ def index():
 @app.route('/feed')
 def post_feed():
       
-      cursor = connection.cursor()
+      cursor = get_db().cursor()
       
       cursor.execute("SELECT * FROM `Posts` JOIN `Users` ON `Posts`.`user_id`=`Users`.`id` ORDER BY `timestamp` DESC;")
 
@@ -70,7 +72,7 @@ def post_feed():
 @app.route('/post', methods=['POST'])
 @login_required
 def create_post():
-    cursor = connection.cursor()
+    cursor = get_db().cursor()
 
     photo = request.files['post_image']
 
@@ -91,23 +93,58 @@ def create_post():
     )
 
     return redirect('/feed')
+ 
 
 
-
-@app.route("/sign-in")
+@app.route("/sign-in", methods=['POST', 'GET'])
 def sign_in():
+      if current_user.is_authenticated:
+           return redirect('/feed')
+      
 
-    return render_template(
-        "sign_in.html.jinja"
+      if request.method == 'POST':
+           cursor = get_db().cursor()
+
+
+           cursor.execute("SELECT * FROM `Users` WHERE `username` = %s", (request.form['Username']))
+           result = cursor.fetchone()
+
+           if result is None:
+                return render_template("sign_in.html.jinja")
+           
+
+           
+           if request.form['Password'] == result['password']:
+                user = User(result['id'], result['username'], result['banned'])
+
+                login_user(user)
+
+                return redirect('/feed')
+
+
+           
+           return request.form
+
+      elif request.method == 'GET':
+        return render_template("sign_in.html.jinja")
+    # if current_user.is_authenticated:
+    #     return redirect("/feed") 
+    # else:
+    #     return render_template("sign_in.html.jinja")
     
-    )
+    
+
+    # return render_template(
+    #     "sign_in.html.jinja"
+    # )
+   
 
 
 @app.route("/sign-up", methods=['POST', 'GET'])
 def sign_up():
     if request.method=='POST':
          #Hanlde signup
-        cursor=connection.cursor()
+        cursor=get_db().cursor()
 
         profile=request.files['Profile P']
         file_name=profile.filename #my_photo.jpg
@@ -124,15 +161,18 @@ def sign_up():
         """, (request.form['Username'],request.form['Password'],request.form['email'],request.form['Display Name'],request.form['Biography'],file_name,request.form['Birthdate']))
         
         
-        return redirect('/post')
+        return redirect('/sign-in')
     elif request.method=='GET':
          return render_template('sign_up.html.jinja')
 
+ 
 
     return render_template(
         "sign_up.html.jinja"
     
     )
+    
+   
 
 
 
@@ -141,7 +181,8 @@ def sign_up():
 
 
 
-connection = pymysql.connect(
+def connect_db():
+    return pymysql.connect(
     host = "10.100.33.60",
     user = "kheron",
     password = "222755613",
@@ -152,9 +193,21 @@ connection = pymysql.connect(
 
 )
 
+def get_db():
+    '''Opens a new database connection per request.'''        
+    if not hasattr(g, 'db'):
+        g.db = connect_db()
+    return g.db    
+
+@app.teardown_appcontext
+def close_db(error):
+    '''Closes the database connection at the end of request.'''    
+    if hasattr(g, 'db'):
+        g.db.close() 
+
 @app.route('/profile/<username>')
 def user_profile(username):
-    cursor= connection.cursor()
+    cursor= get_db().cursor()
 
     cursor.execute(' SELECT * FROM `Users` WHERE `username`= %s', (username))
 
@@ -165,7 +218,7 @@ def user_profile(username):
         
     cursor.close()
 
-    cursor=connection.cursor()
+    cursor=get_db().cursor()
 
     cursor.execute('SELECT *from `Posts` WHERE `user_id` =%s',(result['id']))
 
